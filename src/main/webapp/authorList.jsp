@@ -11,7 +11,7 @@
 
 <%
     Object obj = request.getAttribute("authors");
-    if(obj == null){
+    if (obj == null) {
         response.sendRedirect("authors");
     }
 %>
@@ -22,24 +22,32 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="style/bookStyle.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
         <title>Author List</title>
     </head>
     <body>
-        <h1>List of Authors</h1>
-       <table>
-           <th>Author ID</th>
-           <th>Author Name</th>
-           <th>Date Added</th>
-            <c:forEach var="author" items="${authors}">
-                <tr>
-                    <td>${author.getAuthorId()}</td>
-                    <td>${author.getAuthorName()}</td>
-                    <td>${author.getDateAdded()}</td>
-                    
-                </tr>
-            </c:forEach>
-        </table>  
-       
-        
+        <h1 class="header">List of Authors</h1>
+        <div class="container" id="authorTable">
+
+            <table class="table table-hover">
+                <th class="tableHead">Author ID</th>
+                <th class="tableHead">Author Name</th>
+                <th class="tableHead">Date Added</th>
+                    <c:forEach var="author" items="${authors}">
+                    <tr>
+                        <td>${author.getAuthorId()}</td>
+                        <td>${author.getAuthorName()}</td>
+                        <td>${author.getDateAdded()}</td>
+
+                    </tr>
+                </c:forEach>
+            </table>  
+
+
+            
+        </div>
+        <a href="index.jsp">Home</a>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     </body>
 </html>

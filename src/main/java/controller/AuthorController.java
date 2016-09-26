@@ -7,7 +7,10 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,7 +18,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Author;
+import model.AuthorDao;
+import model.AuthorDaoStrategy;
 import model.AuthorService;
+import model.MySqlDbStrategy;
 
 /**
  *
@@ -34,9 +40,11 @@ private final String DESTINATION_VIEW = "/authorList.jsp";
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, ClassNotFoundException, SQLException, Exception {
          response.setContentType("text/html;charset=UTF-8");
-        AuthorService service = new AuthorService();
+        
+        AuthorDaoStrategy dao = new AuthorDao(new MySqlDbStrategy(), "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
+        AuthorService service = new AuthorService(dao);
         List<Author> authors = service.getAuthorList();
         request.setAttribute("authors", authors);
                 RequestDispatcher view = request.getRequestDispatcher(DESTINATION_VIEW);
@@ -55,10 +63,16 @@ private final String DESTINATION_VIEW = "/authorList.jsp";
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    try {
         processRequest(request, response);
+    } catch (SQLException ex) {
+        Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception ex) {
+        Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
     }
-
+    }
     /**
+
      * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
@@ -69,7 +83,13 @@ private final String DESTINATION_VIEW = "/authorList.jsp";
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    try {
         processRequest(request, response);
+    } catch (SQLException ex) {
+        Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception ex) {
+        Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
+    }
     }
 
     /**

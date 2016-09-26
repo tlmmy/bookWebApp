@@ -24,9 +24,9 @@ public class Author {
     }
 
     public Author(int authorId, String authorName, Date dateAdded) {
-        this.authorId = authorId;
-        this.authorName = authorName;
-        this.dateAdded = dateAdded;
+        setAuthorId(authorId);
+        setAuthorName(authorName);
+        setDateAdded(dateAdded);
     }
     
     
@@ -78,6 +78,11 @@ public class Author {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "authorId=" + authorId + ", authorName=" + authorName + ", dateAdded=" + dateAdded;
     }
     
     

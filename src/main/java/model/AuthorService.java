@@ -5,7 +5,9 @@
  */
 package model;
 
-import java.util.Arrays;
+import java.sql.Array;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,22 +16,40 @@ import java.util.List;
  * @author Tim
  */
 public class AuthorService {
-    private List<Author> authors;
-    
-    public AuthorService() {
-        initFakeDb();
+    private AuthorDaoStrategy dao;
+
+    public AuthorService(AuthorDaoStrategy dao) {
+        this.dao = dao;
     }
     
-    private final void initFakeDb() {
-        authors = Arrays.asList(
-                new Author(1, "George RR Martin", new Date()),
-                new Author(2, "JK Rowling", new Date()),
-                new Author(3, "Suzanne Collins", new Date())
-        );
-        
-    }
-    
-    public final List<Author> getAuthorList() {
-        return authors;
+    public final List<Author> getAuthorList() throws ClassNotFoundException, SQLException {
+        return dao.getAuthorList();
 }
+    
+    public final Author getAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException{
+        return dao.findAuthorById(primaryKey);
+    }
+    
+    public final void createAuthor(Object authorId, Object authorName, Object dateAdded) throws ClassNotFoundException, SQLException{
+        List<Object> colValues = new ArrayList<>();
+        colValues.add(authorId);
+        colValues.add(authorName);
+        colValues.add(dateAdded);
+        dao.createAuthor(colValues);
+    }
+    
+    public final void deleteAuthor(Object primaryKey) throws ClassNotFoundException, SQLException{
+        dao.deleteAuthor(primaryKey);
+    }
+    
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        AuthorDaoStrategy dao = new AuthorDao(new MySqlDbStrategy(), "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
+        AuthorService service = new AuthorService(dao);
+        service.createAuthor(5, "Stephen King", "2016-09-26");
+        service.deleteAuthor(5);
+        List<Author> authors  = service.getAuthorList();
+        Author author = service.getAuthorById(3);
+        System.out.println(authors);
+        System.out.println(author);
+    }
 }
