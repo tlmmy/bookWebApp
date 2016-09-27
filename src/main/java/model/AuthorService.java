@@ -27,7 +27,7 @@ public class AuthorService {
 }
     
     public final Author getAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException{
-        return dao.findAuthorById(primaryKey);
+//        return dao.findAuthorById(primaryKey);
     }
     
     public final void createAuthor(Object authorId, Object authorName, Object dateAdded) throws ClassNotFoundException, SQLException{
@@ -48,8 +48,8 @@ public class AuthorService {
         service.createAuthor(5, "Stephen King", "2016-09-26");
         service.deleteAuthor(5);
         List<Author> authors  = service.getAuthorList();
-        Author author = service.getAuthorById(3);
+        //Author author = service.getAuthorById(3);
         System.out.println(authors);
-        System.out.println(author);
+        //System.out.println(author);
     }
 }

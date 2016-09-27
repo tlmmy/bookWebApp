@@ -63,21 +63,20 @@ public class MySqlDbStrategy implements DbStrategy {
 
         return records;
     }
-    
+
     @Override
-    public Map<String,Object> findRecordByPrimaryKey(String tableName, String colName, Object primaryKey) throws SQLException{
-        String sql = "SELECT * FROM " + tableName + " WHERE " + colName + " = " + primaryKey;
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int colCount = rsmd.getColumnCount();
-        Map<String, Object> record = new LinkedHashMap<>();
-            for (int i = 1; i <= colCount; i++) {
-                String columnName = rsmd.getColumnName(i);
-                Object colData = rs.getObject(colName);
-                record.put(columnName, colData);
-            }
-        return record;
+    public Map<String, Object> findRecordByPrimaryKey(String tableName, String colName, Object primaryKey) throws SQLException {
+//        String sql = "SELECT * FROM " + tableName + " WHERE " + colName + " = " + primaryKey;
+//        Statement stmt = conn.createStatement();
+//        ResultSet rs = stmt.executeQuery(sql);
+//        ResultSetMetaData rsmd = rs.getMetaData();
+//        int colCount = rsmd.getColumnCount();
+//        Map<String, Object> record = new LinkedHashMap<>();
+//        for (int i = 1; i <= colCount; i++) {
+//            record.put(rsmd.getColumnName(i), rs.getObject(i));
+//        }
+//
+//        return record;
     }
 
     //DELETE FROM tableName WHERE columnName = primaryKey
@@ -86,7 +85,7 @@ public class MySqlDbStrategy implements DbStrategy {
         String sql = "DELETE FROM " + tableName + " WHERE " + columnName + " = " + primaryKey;
         Statement stmt = conn.createStatement();
         stmt.executeUpdate(sql);
-           
+
     }
 
     @Override
@@ -117,7 +116,7 @@ public class MySqlDbStrategy implements DbStrategy {
         }
         recsUpdated = pstmt.executeUpdate();
         pstmt.close();
-     
+
     }
 
     private PreparedStatement buildInsertStatement(Connection conn_loc, String tableName, List colDescriptors)
@@ -141,7 +140,9 @@ public class MySqlDbStrategy implements DbStrategy {
         MySqlDbStrategy db = new MySqlDbStrategy();
         db.openConnection("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
         List<Map<String, Object>> records = db.findAllRecords("author", 1000);
+        Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 5);
         System.out.println(records);
+        System.out.println(author);
         db.closeConnection();
     }
 

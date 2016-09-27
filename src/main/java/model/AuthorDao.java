@@ -80,23 +80,24 @@ public class AuthorDao implements AuthorDaoStrategy {
     }
 
     public Author findAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException {
-        db.openConnection(driverClass, url, userName, password);
-        Map<String, Object> rec = db.findRecordByPrimaryKey("author", "author_id", primaryKey);
-        Author author = new Author();
-        int id = Integer.parseInt(rec.get("author_id").toString());
-        author.setAuthorId(id);
-        String authorName = rec.get("author_name").toString();
-        author.setAuthorName(authorName != null ? authorName : "");
-        Date dateAdded = (Date) rec.get("date_added");
-        author.setDateAdded(dateAdded);
-        db.closeConnection();
-        return author;
+//        db.openConnection(driverClass, url, userName, password);
+//        Map<String, Object> rec = db.findRecordByPrimaryKey("author", "author_id", primaryKey);
+//        Author author = new Author();
+//        int id = Integer.parseInt(rec.get("author_id").toString());
+//        author.setAuthorId(id);
+//        String authorName = rec.get("author_name").toString();
+//        author.setAuthorName(authorName != null ? authorName : "");
+//        Date dateAdded = (Date) rec.get("date_added");
+//        author.setDateAdded(dateAdded);
+//        db.closeConnection();
+//        return author;
     }
 
     public static void main(String[] args) throws Exception {
         AuthorDaoStrategy dao = new AuthorDao(new MySqlDbStrategy(), "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
-
+        //Author author = dao.findAuthorById(4);
         List<Author> authors = dao.getAuthorList();
         System.out.println(authors);
+        //System.out.println(author);
     }
 }
