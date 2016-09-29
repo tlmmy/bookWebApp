@@ -13,6 +13,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,83 +67,100 @@ public class MySqlDbStrategy implements DbStrategy {
 
     @Override
     public Map<String, Object> findRecordByPrimaryKey(String tableName, String colName, Object primaryKey) throws SQLException {
-//        String sql = "SELECT * FROM " + tableName + " WHERE " + colName + " = " + primaryKey;
-//        Statement stmt = conn.createStatement();
-//        ResultSet rs = stmt.executeQuery(sql);
-//        ResultSetMetaData rsmd = rs.getMetaData();
-//        int colCount = rsmd.getColumnCount();
-//        Map<String, Object> record = new LinkedHashMap<>();
-//        for (int i = 1; i <= colCount; i++) {
-//            record.put(rsmd.getColumnName(i), rs.getObject(i));
-//        }
-//
-//        return record;
+        String sql = "SELECT * FROM " + tableName + " WHERE " + colName + " = " + primaryKey;
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int colCount = rsmd.getColumnCount();
+
+        Map<String, Object> record = new LinkedHashMap<>();
+        while (rs.next()) {
+
+            for (int i = 1; i <= colCount; i++) {
+                String columnName = rsmd.getColumnName(i);
+                Object colData = rs.getObject(columnName);
+                record.put(columnName, colData);
+            }
+
+        }
+
+        return record;
     }
 
     //DELETE FROM tableName WHERE columnName = primaryKey
     @Override
     public void deleteRecordByPrimaryKey(String tableName, String columnName, Object primaryKey) throws SQLException {
-        String sql = "DELETE FROM " + tableName + " WHERE " + columnName + " = " + primaryKey;
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate(sql);
 
+        PreparedStatement stmt = buildDeleteStatement(tableName, columnName, primaryKey);
+
+        stmt.executeUpdate();
     }
 
     @Override
     public void createRecord(String tableName, List<String> colNames, List<Object> colValues) throws SQLException {
-        PreparedStatement pstmt = null;
-        int recsUpdated = 0;
-        pstmt = buildInsertStatement(conn, tableName, colNames);
-
-        final Iterator i = colValues.iterator();
-        int index = 1;
-        while (i.hasNext()) {
-            final Object obj = i.next();
-            if (obj instanceof String) {
-                pstmt.setString(index++, (String) obj);
-            } else if (obj instanceof Integer) {
-                pstmt.setInt(index++, ((Integer) obj).intValue());
-            } else if (obj instanceof Long) {
-                pstmt.setLong(index++, ((Long) obj).longValue());
-            } else if (obj instanceof Double) {
-                pstmt.setDouble(index++, ((Double) obj).doubleValue());
-            } else if (obj instanceof java.sql.Date) {
-                pstmt.setDate(index++, (java.sql.Date) obj);
-            } else if (obj instanceof Boolean) {
-                pstmt.setBoolean(index++, ((Boolean) obj).booleanValue());
-            } else if (obj != null) {
-                pstmt.setObject(index++, obj);
-            }
+        PreparedStatement stmt = buildInsertStatement(tableName, colNames);
+        for (int i = 0; i < colValues.size(); i++) {
+            stmt.setObject(i + 1, colValues.get(i));
         }
-        recsUpdated = pstmt.executeUpdate();
-        pstmt.close();
-
+        stmt.executeUpdate();
     }
 
-    private PreparedStatement buildInsertStatement(Connection conn_loc, String tableName, List colDescriptors)
+    private PreparedStatement buildInsertStatement(String tableName, List colNames)
             throws SQLException {
-        StringBuffer sql = new StringBuffer("INSERT INTO ");
-        (sql.append(tableName)).append(" (");
-        final Iterator i = colDescriptors.iterator();
-        while (i.hasNext()) {
-            (sql.append((String) i.next())).append(", ");
+
+        String sql = "INSERT INTO " + tableName;
+        StringJoiner sj = new StringJoiner(", ", "(", ")");
+        for (Object colName : colNames) {
+            sj.add(colName.toString());
         }
-        sql = new StringBuffer((sql.toString()).substring(0, (sql.toString()).lastIndexOf(", ")) + ") VALUES (");
-        for (int j = 0; j < colDescriptors.size(); j++) {
-            sql.append("?, ");
+        sql += sj.toString();
+        sql += " VALUES ";
+        sj = new StringJoiner(", ", "(", ")");
+        for (Object colName : colNames) {
+            sj.add("?");
         }
-        final String finalSQL = (sql.toString()).substring(0, (sql.toString()).lastIndexOf(", ")) + ")";
-        //System.out.println(finalSQL);
-        return conn_loc.prepareStatement(finalSQL);
+        sql += sj.toString();
+        return conn.prepareStatement(sql);
+    }
+
+    private PreparedStatement buildDeleteStatement(String tableName, String columnName, Object primaryKey)
+            throws SQLException {
+        String sql = "DELETE FROM " + tableName + " WHERE " + columnName + " = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setObject(1, primaryKey);
+        return stmt;
+    }
+
+    private PreparedStatement buildUpdateStatement(String tableName,
+            List colNames, String whereField)
+            throws SQLException {
+               
+        String sql = "UPDATE " + tableName + " SET ";
+        StringJoiner sj = new StringJoiner(", ","","");
+        for(Object colName : colNames){
+            sj.add(colName.toString() + " = ?,");
+        }
+        sql += sj.toString();
+        sql += " WHERE " + whereField + " = ?";
+        return conn.prepareStatement(sql);
     }
 
     public static void main(String[] args) throws Exception {
         MySqlDbStrategy db = new MySqlDbStrategy();
         db.openConnection("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
+        //List<Map<String, Object>> records = db.findAllRecords("author", 1000);
+        //System.out.println(author);
+        //List<String> colNames = Arrays.asList("author_name", "date_added");
+        List<String> colNames = Arrays.asList("author_id", "author_name", "date_added");
+        //List<Object> colValues = new ArrayList<>();
+        //colValues.add("Chelsea Orozco");
+        //colValues.add("1991-03-27");
+        //db.createRecord("author", colNames , colValues);
+        //Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 1);
+        //System.out.println(author);
+        //db.deleteRecordByPrimaryKey("author", "author_id", 6);
         List<Map<String, Object>> records = db.findAllRecords("author", 1000);
-        Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 5);
         System.out.println(records);
-        System.out.println(author);
         db.closeConnection();
     }
 

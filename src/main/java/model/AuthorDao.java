@@ -20,10 +20,10 @@ import java.util.Map;
 public class AuthorDao implements AuthorDaoStrategy {
 
     private DbStrategy db;
-    private String driverClass;
-    private String url;
-    private String userName;
-    private String password;
+    private final String driverClass;
+    private final String url;
+    private final String userName;
+    private final String password;
 
     public AuthorDao(DbStrategy db, String driverClass, String url, String userName, String password) {
         this.db = db;
@@ -67,30 +67,32 @@ public class AuthorDao implements AuthorDaoStrategy {
     @Override
     public void createAuthor(List<Object> colValues) throws ClassNotFoundException, SQLException {
         db.openConnection(driverClass, url, userName, password);
-        List<String> colNames = Arrays.asList("author_id", "author_name", "date_added");
+        List<String> colNames = Arrays.asList("author_name", "date_added");
         db.createRecord("author", colNames, colValues);
         db.closeConnection();
     }
 
     @Override
-    public void deleteAuthor(Object primaryKey) throws ClassNotFoundException, SQLException {
+    public void deleteAuthorById(String primaryKey) throws ClassNotFoundException, SQLException, NumberFormatException {
+        
         db.openConnection(driverClass, url, userName, password);
-        db.deleteRecordByPrimaryKey("author", "author_id", primaryKey);
+        Integer id = Integer.parseInt(primaryKey);
+        db.deleteRecordByPrimaryKey("author", "author_id", id);
         db.closeConnection();
     }
 
     public Author findAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException {
-//        db.openConnection(driverClass, url, userName, password);
-//        Map<String, Object> rec = db.findRecordByPrimaryKey("author", "author_id", primaryKey);
-//        Author author = new Author();
-//        int id = Integer.parseInt(rec.get("author_id").toString());
-//        author.setAuthorId(id);
-//        String authorName = rec.get("author_name").toString();
-//        author.setAuthorName(authorName != null ? authorName : "");
-//        Date dateAdded = (Date) rec.get("date_added");
-//        author.setDateAdded(dateAdded);
-//        db.closeConnection();
-//        return author;
+        db.openConnection(driverClass, url, userName, password);
+        Map<String, Object> rec = db.findRecordByPrimaryKey("author", "author_id", primaryKey);
+        Author author = new Author();
+        int id = Integer.parseInt(rec.get("author_id").toString());
+        author.setAuthorId(id);
+        String authorName = rec.get("author_name").toString();
+        author.setAuthorName(authorName != null ? authorName : "");
+        Date dateAdded = (Date) rec.get("date_added");
+        author.setDateAdded(dateAdded);
+        db.closeConnection();
+        return author;
     }
 
     public static void main(String[] args) throws Exception {

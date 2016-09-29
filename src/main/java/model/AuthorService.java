@@ -27,29 +27,28 @@ public class AuthorService {
 }
     
     public final Author getAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException{
-//        return dao.findAuthorById(primaryKey);
+        return dao.findAuthorById(primaryKey);
     }
     
-    public final void createAuthor(Object authorId, Object authorName, Object dateAdded) throws ClassNotFoundException, SQLException{
+    public final void createAuthor(Object authorName, Object dateAdded) throws ClassNotFoundException, SQLException{
         List<Object> colValues = new ArrayList<>();
-        colValues.add(authorId);
         colValues.add(authorName);
         colValues.add(dateAdded);
         dao.createAuthor(colValues);
     }
     
-    public final void deleteAuthor(Object primaryKey) throws ClassNotFoundException, SQLException{
-        dao.deleteAuthor(primaryKey);
+    public final void deleteAuthorById(String primaryKey) throws ClassNotFoundException, SQLException{
+        dao.deleteAuthorById(primaryKey);
     }
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         AuthorDaoStrategy dao = new AuthorDao(new MySqlDbStrategy(), "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
         AuthorService service = new AuthorService(dao);
-        service.createAuthor(5, "Stephen King", "2016-09-26");
-        service.deleteAuthor(5);
-        List<Author> authors  = service.getAuthorList();
-        //Author author = service.getAuthorById(3);
-        System.out.println(authors);
-        //System.out.println(author);
+        //service.createAuthor("Tim Rogers", "1990-07-14");
+        //service.deleteAuthorById("5");
+        //List<Author> authors  = service.getAuthorList();
+        Author author = service.getAuthorById(7);
+        //System.out.println(authors);
+        System.out.println(author);
     }
 }
