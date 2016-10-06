@@ -5,6 +5,7 @@
  */
 package model;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,12 +20,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import javax.enterprise.context.Dependent;
 
 /**
  *
  * @author trogers8
  */
-public class MySqlDbStrategy implements DbStrategy {
+@Dependent
+public class MySqlDbStrategy implements DbStrategy, Serializable {
 
     private Connection conn;
 
@@ -86,6 +89,16 @@ public class MySqlDbStrategy implements DbStrategy {
 
         return record;
     }
+    
+    @Override
+    public void updateRecordByPrimaryKey(String tableName, List<String> colNames, List<Object> colValues, String whereField, Object whereValue) throws SQLException{
+        PreparedStatement stmt = buildUpdateStatement(tableName, colNames, whereField);
+        for (int i = 0; i < colValues.size(); i++) {
+            stmt.setObject(i + 1, colValues.get(i));
+        }
+        stmt.setObject(colValues.size() + 1, whereValue);
+        stmt.executeUpdate();
+    }
 
     //DELETE FROM tableName WHERE columnName = primaryKey
     @Override
@@ -136,9 +149,9 @@ public class MySqlDbStrategy implements DbStrategy {
             throws SQLException {
                
         String sql = "UPDATE " + tableName + " SET ";
-        StringJoiner sj = new StringJoiner(", ","","");
+        StringJoiner sj = new StringJoiner(", ");
         for(Object colName : colNames){
-            sj.add(colName.toString() + " = ?,");
+            sj.add(colName.toString() + " = ?");
         }
         sql += sj.toString();
         sql += " WHERE " + whereField + " = ?";
@@ -151,11 +164,13 @@ public class MySqlDbStrategy implements DbStrategy {
         //List<Map<String, Object>> records = db.findAllRecords("author", 1000);
         //System.out.println(author);
         //List<String> colNames = Arrays.asList("author_name", "date_added");
-        List<String> colNames = Arrays.asList("author_id", "author_name", "date_added");
-        //List<Object> colValues = new ArrayList<>();
-        //colValues.add("Chelsea Orozco");
-        //colValues.add("1991-03-27");
+        List<String> colNames = Arrays.asList("author_name", "date_added");
+        
+        List<Object> colValues = new ArrayList<>();
+        colValues.add("Joe Smith");
+        colValues.add("2000-09-28");
         //db.createRecord("author", colNames , colValues);
+        db.updateRecordByPrimaryKey("author", colNames, colValues, "author_id", 8);
         //Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 1);
         //System.out.println(author);
         //db.deleteRecordByPrimaryKey("author", "author_id", 6);

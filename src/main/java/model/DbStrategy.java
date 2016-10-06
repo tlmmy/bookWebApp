@@ -22,5 +22,6 @@ public interface DbStrategy {
     void openConnection(String driverClass, String url, String userName, String password) throws ClassNotFoundException, SQLException;
     void createRecord(String tableName, List<String> colNames, List<Object> colValues) throws SQLException;
     public Map<String,Object> findRecordByPrimaryKey(String tableName, String colName, Object primaryKey) throws SQLException;
+    public void updateRecordByPrimaryKey(String tableName, List<String> colNames, List<Object> colValues, String whereField, Object whereValue) throws SQLException;
     
 }

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,6 +31,25 @@ import model.MySqlDbStrategy;
 @WebServlet(name = "AuthorController", urlPatterns = {"/authors"})
 public class AuthorController extends HttpServlet {
 private final String DESTINATION_VIEW = "/authorList.jsp";
+    private String driverClass;
+    private String url;
+    private String userName;
+    private String password;
+    
+    @Inject
+    private AuthorService service;
+    
+    @Override
+    public void init() throws ServletException{
+        driverClass = "com.mysql.jdbc.Driver";
+        url = "jdbc:mysql://localhost:3306/book"; 
+        userName = "root";
+        password = "admin";
+    }
+    
+    private void configDbConnection(){
+        service.getDao().initDao(driverClass, url, userName, password);
+    }
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,8 +63,7 @@ private final String DESTINATION_VIEW = "/authorList.jsp";
             throws ServletException, IOException, ClassNotFoundException, SQLException, Exception {
          response.setContentType("text/html;charset=UTF-8");
         
-        AuthorDaoStrategy dao = new AuthorDao(new MySqlDbStrategy(), "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
-        AuthorService service = new AuthorService(dao);
+        configDbConnection();
         List<Author> authors = service.getAuthorList();
         request.setAttribute("authors", authors);
                 RequestDispatcher view = request.getRequestDispatcher(DESTINATION_VIEW);
