@@ -17,7 +17,7 @@ href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <body>
         <div class="container">
         <h1 class="header">Link to List of Authors</h1>
-        <a href="authorList.jsp">View All Authors</a>
+        <a href="authors">View All Authors</a>
         </div>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     </body>

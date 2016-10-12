@@ -75,9 +75,12 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
     }
 
     @Override
-    public void createAuthor(List<Object> colValues) throws ClassNotFoundException, SQLException {
+    public void createAuthor(String name) throws ClassNotFoundException, SQLException {
         db.openConnection(driverClass, url, userName, password);
         List<String> colNames = Arrays.asList("author_name", "date_added");
+        List<Object> colValues = new ArrayList();
+        colValues.add(name);
+        colValues.add(new Date());
         db.createRecord("author", colNames, colValues);
         db.closeConnection();
     }
