@@ -87,35 +87,37 @@ public class AuthorController extends HttpServlet {
 
             switch (formAction) {
                 case "Add":
-                    //pass in a null author
                     author = null;
                     request.setAttribute("author", author);
                     destination = ADD_OR_UPDATE_VIEW;
                     break;
 
                 case "Update":
-                    //pass in author
-                    if(request.getParameter("authorPk") != null){
-                        
-                    
-                    author = service.getAuthorById(request.getParameter("authorPk"));
-                    request.setAttribute("author", author);
-                    destination = ADD_OR_UPDATE_VIEW;
-                    }
-                    else{
-                         authorList = service.getAuthorList();
-                    request.setAttribute("authors", authorList);
-                    destination = LIST_VIEW;
+
+                    if (request.getParameter("authorPk") != null) {
+
+                        author = service.getAuthorById(request.getParameter("authorPk"));
+                        request.setAttribute("author", author);
+                        destination = ADD_OR_UPDATE_VIEW;
+                    } else {
+                        authorList = service.getAuthorList();
+                        request.setAttribute("authors", authorList);
+                        destination = LIST_VIEW;
                     }
                     break;
                 case "Delete":
-                    authId = request.getParameter("authorPk");
-                    service.deleteAuthorById(authId);
-                    authorList = service.getAuthorList();
-                    request.setAttribute("authors", authorList);
-                    destination = LIST_VIEW;
+                    if (request.getParameter("authorPk") != null) {
+                        authId = request.getParameter("authorPk");
+                        service.deleteAuthorById(authId);
+                        authorList = service.getAuthorList();
+                        request.setAttribute("authors", authorList);
+                        destination = LIST_VIEW;
+                    } else {
+                        authorList = service.getAuthorList();
+                        request.setAttribute("authors", authorList);
+                        destination = LIST_VIEW;
+                    }
                     break;
-
                 case "Create":
                     authId = request.getParameter("authorName");
                     service.createAuthor(authId);
