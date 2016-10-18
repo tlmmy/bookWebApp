@@ -22,7 +22,8 @@
         <!--
         use if logic using a author being null or not to set the values of the form
         -->
-        <form id="addOrUpdate" name="addOrUpdateForm" method="POST" action="authors">
+        <form id="addOrUpdate" name="addOrUpdateForm" method="POST" action="<%= response.encodeURL("authors")%>">
+            <h3>Add/Edit Author</h2>
             <c:choose>
             <c:when test="${author != null}">
                 <table>
@@ -63,5 +64,9 @@
 
         </form>
         <a href="authors">Back to List</a>
+        <jsp:include page="footer.jsp" />
+                 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
     </body>
+    
 </html>

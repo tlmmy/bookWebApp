@@ -20,7 +20,7 @@
         <p style="color:white">Click the buttons to use the corresponding functions.</p>
         <a href="authors">Back to List</a>
         
-        <div class="footer" style="color:black">Application Launched ${date}</div>
+        <jsp:include page="footer.jsp" />
          <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     </body>
     

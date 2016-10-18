@@ -8,17 +8,21 @@ package controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import model.Author;
 import model.AuthorDao;
 import model.AuthorDaoStrategy;
@@ -68,27 +72,36 @@ public class AuthorController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ClassNotFoundException, SQLException, Exception {
         response.setContentType("text/html;charset=UTF-8");
+        HttpSession session = request.getSession();
+        if (session.getAttribute("updated") == null){
+            session.setAttribute("updated", 0);
+        }
+        if (session.getAttribute("created") == null){
+            session.setAttribute("created", 0);
+        }
+        if (session.getAttribute("deleted") == null){
+            session.setAttribute("deleted", 0);
+        }
+        ServletContext ctx = request.getServletContext();
+        ctx.setAttribute("date", new Date());
         String destination = LIST_VIEW;
         Author author;
         try {
             configDbConnection();
 
-//            List<Author> authorList = service.getAuthorList();
-//            request.setAttribute("authors", authorList);
-//            RequestDispatcher view = request.getRequestDispatcher(LIST_VIEW);
-//            view.forward(request, response);
+
             String formAction = request.getParameter("userAction");
             if (formAction == null) {
                 formAction = "";
             }
             String authId;
-
-            List<Author> authorList = null;
+            String authName;
+            
 
             switch (formAction) {
                 case "Add":
                     author = null;
-                    request.setAttribute("author", author);
+                    refreshList(request, service);
                     destination = ADD_OR_UPDATE_VIEW;
                     break;
 
@@ -100,8 +113,7 @@ public class AuthorController extends HttpServlet {
                         request.setAttribute("author", author);
                         destination = ADD_OR_UPDATE_VIEW;
                     } else {
-                        authorList = service.getAuthorList();
-                        request.setAttribute("authors", authorList);
+                        refreshList(request, service);
                         destination = LIST_VIEW;
                     }
                     break;
@@ -109,20 +121,19 @@ public class AuthorController extends HttpServlet {
                     if (request.getParameter("authorPk") != null) {
                         authId = request.getParameter("authorPk");
                         service.deleteAuthorById(authId);
-                        authorList = service.getAuthorList();
-                        request.setAttribute("authors", authorList);
+                        session.setAttribute("deleted", (int)session.getAttribute("deleted") + 1);
+                        refreshList(request, service);
                         destination = LIST_VIEW;
                     } else {
-                        authorList = service.getAuthorList();
-                        request.setAttribute("authors", authorList);
+                        refreshList(request, service);
                         destination = LIST_VIEW;
                     }
                     break;
                 case "Create":
-                    authId = request.getParameter("authorName");
-                    service.createAuthor(authId);
-                    authorList = service.getAuthorList();
-                    request.setAttribute("authors", authorList);
+                    authName = request.getParameter("authorName");
+                    service.createAuthor(authName);
+                    session.setAttribute("created", (int)session.getAttribute("created") + 1);
+                    refreshList(request, service);
                     destination = LIST_VIEW;
                     break;
 
@@ -130,22 +141,29 @@ public class AuthorController extends HttpServlet {
                     authId = request.getParameter("authorId");
                     String authorName = request.getParameter("authorName");
                     service.updateAuthorById(authId, authorName);
-                    authorList = service.getAuthorList();
-                    request.setAttribute("authors", authorList);
+                    session.setAttribute("updated", (int)session.getAttribute("updated") + 1);
+                    refreshList(request, service);
                     destination = LIST_VIEW;
                     break;
+                    
+                case "Help":
+                    response.sendRedirect("help.jsp");
 
                 default:
-                    authorList = service.getAuthorList();
-                    request.setAttribute("authors", authorList);
+                    refreshList(request, service);
                     destination = LIST_VIEW;
                     break;
             }
         } catch (Exception e) {
             request.setAttribute("errMsg", e.getCause().getMessage());
         }
-        RequestDispatcher view = request.getRequestDispatcher(destination);
+        RequestDispatcher view = getServletContext().getRequestDispatcher(response.encodeURL(destination));
         view.forward(request, response);
+    }
+
+    public void refreshList(HttpServletRequest request, AuthorService service) throws ClassNotFoundException, SQLException {
+        List<Author> authorList = service.getAuthorList();
+        request.setAttribute("authors", authorList);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
