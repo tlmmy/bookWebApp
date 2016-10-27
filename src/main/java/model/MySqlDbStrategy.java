@@ -15,11 +15,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import javax.sql.DataSource;
 import javax.enterprise.context.Dependent;
 
 /**
@@ -32,14 +32,23 @@ public class MySqlDbStrategy implements DbStrategy, Serializable {
     private Connection conn;
 
     @Override
+    public void openConnection(DataSource ds)
+            throws ClassNotFoundException, SQLException{
+        
+        conn = ds.getConnection();
+       
+        
+    }
+    
+    @Override
     public void openConnection(String driverClass, String url,
             String userName, String password)
             throws ClassNotFoundException, SQLException {
 
         Class.forName(driverClass);
         conn = DriverManager.getConnection(url, userName, password);
-    }
 
+    }
     @Override
     public void closeConnection() throws SQLException {
         conn.close();
@@ -159,24 +168,24 @@ public class MySqlDbStrategy implements DbStrategy, Serializable {
     }
 
     public static void main(String[] args) throws Exception {
-        MySqlDbStrategy db = new MySqlDbStrategy();
-        db.openConnection("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
-        //List<Map<String, Object>> records = db.findAllRecords("author", 1000);
-        //System.out.println(author);
-        //List<String> colNames = Arrays.asList("author_name", "date_added");
-        List<String> colNames = Arrays.asList("author_name", "date_added");
-        
-        List<Object> colValues = new ArrayList<>();
-        colValues.add("Joe Smith");
-        colValues.add("2000-09-28");
-        //db.createRecord("author", colNames , colValues);
-        db.updateRecordByPrimaryKey("author", colNames, colValues, "author_id", 8);
-        //Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 1);
-        //System.out.println(author);
-        //db.deleteRecordByPrimaryKey("author", "author_id", 6);
-        List<Map<String, Object>> records = db.findAllRecords("author", 1000);
-        System.out.println(records);
-        db.closeConnection();
+//        MySqlDbStrategy db = new MySqlDbStrategy();
+//        db.openConnection("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/book", "root", "admin");
+//        //List<Map<String, Object>> records = db.findAllRecords("author", 1000);
+//        //System.out.println(author);
+//        //List<String> colNames = Arrays.asList("author_name", "date_added");
+//        List<String> colNames = Arrays.asList("author_name", "date_added");
+//        
+//        List<Object> colValues = new ArrayList<>();
+//        colValues.add("Joe Smith");
+//        colValues.add("2000-09-28");
+//        //db.createRecord("author", colNames , colValues);
+//        db.updateRecordByPrimaryKey("author", colNames, colValues, "author_id", 8);
+//        //Map<String, Object> author = db.findRecordByPrimaryKey("author", "author_id", 1);
+//        //System.out.println(author);
+//        //db.deleteRecordByPrimaryKey("author", "author_id", 6);
+//        List<Map<String, Object>> records = db.findAllRecords("author", 1000);
+//        System.out.println(records);
+//        db.closeConnection();
     }
 
 }

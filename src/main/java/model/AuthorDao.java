@@ -10,10 +10,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import javax.activation.DataSource;
+import javax.sql.DataSource;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -27,6 +26,8 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
 @Inject
     private DbStrategy db;
 
+    private DataSource ds;
+    
     private String driverClass;
     private String url;
     private String userName;
@@ -43,6 +44,11 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
       setUserName(user);
       setPassword(password);
   }
+  
+  @Override
+  public void initDao(DataSource ds) throws SQLException{
+      setDs(ds);
+  }
     public DbStrategy getDb() {
         return db;
     }
@@ -51,11 +57,25 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
         this.db = db;
     }
 
+    public DataSource getDs() {
+        return ds;
+    }
+
+    public void setDs(DataSource ds) {
+        this.ds = ds;
+    }
+
     @Override
     public List<Author> getAuthorList()
             throws ClassNotFoundException, SQLException {
 
-        db.openConnection(driverClass, url, userName, password);
+        if(ds == null){
+                db.openConnection(driverClass, url, userName, password);
+            }
+            else {
+                db.openConnection(ds);
+            }
+        
 
         List<Map<String, Object>> records = db.findAllRecords("author", 500);
         List<Author> authors = new ArrayList();
@@ -76,7 +96,12 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
 
     @Override
     public void createAuthor(String name) throws ClassNotFoundException, SQLException {
-        db.openConnection(driverClass, url, userName, password);
+        if(ds == null){
+                db.openConnection(driverClass, url, userName, password);
+            }
+            else {
+                db.openConnection(ds);
+            }
         List<String> colNames = Arrays.asList("author_name", "date_added");
         List<Object> colValues = new ArrayList();
         colValues.add(name);
@@ -88,7 +113,12 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
     @Override
     public void deleteAuthorById(String primaryKey) throws ClassNotFoundException, SQLException, NumberFormatException {
         
-        db.openConnection(driverClass, url, userName, password);
+        if(ds == null){
+                db.openConnection(driverClass, url, userName, password);
+            }
+            else {
+                db.openConnection(ds);
+            }
         Integer id = Integer.parseInt(primaryKey);
         db.deleteRecordByPrimaryKey("author", "author_id", id);
         db.closeConnection();
@@ -96,7 +126,12 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
 
     @Override
     public Author findAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException {
-        db.openConnection(driverClass, url, userName, password);
+       if(ds == null){
+                db.openConnection(driverClass, url, userName, password);
+            }
+            else {
+                db.openConnection(ds);
+            }
         Map<String, Object> rec = db.findRecordByPrimaryKey("author", "author_id", primaryKey);
         Author author = new Author();
         int id = Integer.parseInt(rec.get("author_id").toString());
@@ -111,7 +146,12 @@ public class AuthorDao implements AuthorDaoStrategy, Serializable{
     
     @Override
     public void updateAuthorById(List<String> colNames, List<Object> colValues, Object whereValue) throws ClassNotFoundException, SQLException{
-        db.openConnection(driverClass, url, userName, password);
+       if(ds == null){
+                db.openConnection(driverClass, url, userName, password);
+            }
+            else {
+                db.openConnection(ds);
+            }
         db.updateRecordByPrimaryKey("author", colNames, colValues, "author_id", whereValue);
         db.closeConnection();
     }

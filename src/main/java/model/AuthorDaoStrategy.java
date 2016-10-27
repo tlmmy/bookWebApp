@@ -7,6 +7,7 @@ package model;
 
 import java.sql.SQLException;
 import java.util.List;
+import javax.sql.DataSource;
 
 /**
  *
@@ -20,4 +21,5 @@ public interface AuthorDaoStrategy {
     Author findAuthorById(Object primaryKey) throws ClassNotFoundException, SQLException;
      public void updateAuthorById(List<String> colNames, List<Object> colValues, Object whereValue) throws ClassNotFoundException, SQLException;
      public void initDao(String driver, String url, String user, String password);
+      public void initDao(DataSource ds) throws SQLException;
 }
