@@ -15,6 +15,10 @@ label {
      margin-left: 10px;
 }
 
+table{
+    background-color: white;
+}
+
 .header {
     
     font-size: 1.5em;
@@ -22,7 +26,7 @@ label {
     color: white;
 }
 
-#authorTable {
+#listTable {
     padding: 10px 10px 20px 10px;
     border: 1px solid black;
     border-radius: 5px;
@@ -68,4 +72,8 @@ a {
   padding: 1rem;
   background-color: #efefef;
   text-align: center;
+}
+
+p {
+    color: white;
 }

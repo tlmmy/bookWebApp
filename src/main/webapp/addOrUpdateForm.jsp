@@ -24,49 +24,61 @@
         -->
         <form id="addOrUpdate" name="addOrUpdateForm" method="POST" action="<%= response.encodeURL("authors")%>">
             <h3>Add/Edit Author</h2>
-            <c:choose>
-            <c:when test="${author != null}">
-                <table>
-                    <tr>
-                        <td>Author ID:</td>
-                        <td><input type ="text" id="authorId" name="authorId" value="${author.getAuthorId()}" readOnly="true"/></td>
-                    </tr>
-                    <tr>
-                        <td>Author:</td>
-                        <td><input type ="text" id="authorName" name="authorName" value="${author.getAuthorName()}"/></td>
-                    </tr>
-                    <tr>
-                        <td>Date:</td>
-                        <td><input type ="text" name="date" value="${author.getDateAdded()}" readOnly="true"/></td>
-                    </tr>
-                </table>
-                <input type="submit" id="userActionCreate" name="userAction" value="Submit"/>
-            </c:when>
-            <c:otherwise>
+                <c:choose>
+                    <c:when test="${author != null}">
+                        <table>
+                            <tr>
+                                <td>Author ID:</td>
+                                <td><input type ="text" id="authorId" name="authorId" value="${author.getAuthorId()}" readOnly="true"/></td>
+                            </tr>
+                            <tr>
+                                <td>Author:</td>
+                                <td><input type ="text" id="authorName" name="authorName" value="${author.getAuthorName()}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Books:</td>
+                                <td><select>
+                                        <c:forEach var="book" items="${bookSet}">
+                                            <option value="${book.getBookId()}">${book.getTitle()}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
 
-                 <table>
-                    <tr>
-                        <td>Author ID:</td>
-                        <td><input type ="text" id="authorId" name="authorId" value="" readOnly="true"/></td>
-                    </tr>
-                    <tr>
-                        <td>Author:</td>
-                        <td><input type ="text" id="authorName" name="authorName" value=""/></td>
-                    </tr>
-                    <tr>
-                        <td>Date:</td>
-                        <td><input type ="text" name="date" value="" readOnly="true"/></td>
-                    </tr>
-                </table>
-                <input type="submit" id="userActionCreate" name="userAction" value="Create"/>
-            </c:otherwise>
-            </c:choose>
+                                </tr>
+                            
+                            </tr>
+                            <tr>
+                                <td>Date:</td>
+                                <td><input type ="text" name="date" value="${author.getDateAdded()}" readOnly="true"/></td>
+                            </tr>
+                        </table>
+                        <input type="submit" id="userActionCreate" name="userAction" value="Submit"/>
+                    </c:when>
+                    <c:otherwise>
+
+                        <table>
+                            <tr>
+                                <td>Author ID:</td>
+                                <td><input type ="text" id="authorId" name="authorId" value="" readOnly="true"/></td>
+                            </tr>
+                            <tr>
+                                <td>Author:</td>
+                                <td><input type ="text" id="authorName" name="authorName" value=""/></td>
+                            </tr>
+                            <tr>
+                                <td>Date:</td>
+                                <td><input type ="text" name="date" value="" readOnly="true"/></td>
+                            </tr>
+                        </table>
+                        <input type="submit" id="userActionCreate" name="userAction" value="Create"/>
+                    </c:otherwise>
+                </c:choose>
 
         </form>
         <a href="authors">Back to List</a>
         <jsp:include page="footer.jsp" />
-                 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
     </body>
-    
+
 </html>

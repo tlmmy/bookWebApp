@@ -1,7 +1,7 @@
 <%-- 
-    Document   : authorList
-    Created on : Sep 18, 2016, 10:03:28 AM
-    Author     : Tim
+    Document   : bookList
+    Created on : Nov 2, 2016, 9:23:53 PM
+    Author     : Timothy
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -22,23 +22,25 @@
         <script src="http://code.jquery.com/jquery-latest.js"></script>
         
        
-        <title>Author List</title>
+        <title>Book List</title>
     </head>
     <body>
-        <h1 class="header">List of Authors</h1>
+        <h1 class="header">List of Books</h1>
         <div class="container" id="listTable">
-            <form id="authorForm" name="authorForm" method="POST" action="<%= response.encodeURL("authors")%>">
-                <table style="background-color: white" class="table table-hover">
+            <form id="bookForm" name="bookForm" method="POST" action="<%= response.encodeURL("books")%>">
+                <table style="background-color: white"  class="table table-hover">
                     <tr style="background-color: black;color:white;">                    
-                    <th class="tableHead">Author ID</th>
-                    <th class="tableHead">Author Name</th>
-                    <th class="tableHead">Date Added</th>
+                    <th class="tableHead">Book ID</th>
+                    <th class="tableHead">Title</th>
+                    <th class="tableHead">ISBN</th>
+                    <th class="tableHead">Author</th>
                     </tr>
-                        <c:forEach var="author" items="${authors}">
+                        <c:forEach var="book" items="${books}">
                         <tr>
-                            <td><input type="radio" name="authorPk" id="authorPk" value="${author.getAuthorId()}">${author.getAuthorId()}</td>
-                            <td>${author.getAuthorName()}</td>
-                            <td>${author.getDateAdded()}</td>
+                            <td><input type="radio" name="bookPk" id="authorPk" value="${book.getBookId()}">${book.getBookId()}</td>
+                            <td>${book.getTitle()}</td>
+                            <td>${book.getIsbn()}</td>
+                            <td>${book.authorId.getAuthorName()}</td>
 
                         </tr>
                     </c:forEach>
@@ -54,7 +56,7 @@
             <p style="font-weight: bold;color: red;width:500px;">Sorry, data could not be retrieved:<br>
                 ${errMsg}</p>
         </c:if>
-            <p style="color: white">Authors Created: ${created} Updated: ${updated} Deleted: ${deleted}</p>
+            <p style="color: white">Books Created: ${bCreated} Updated: ${bUpdated} Deleted: ${bDeleted}</p>
         </div>
         <a href="index.jsp">Home</a>
         <jsp:include page="footer.jsp" />

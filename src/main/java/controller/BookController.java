@@ -6,19 +6,17 @@
 package controller;
 
 import ejb.AuthorFacade;
+import ejb.BookFacade;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,22 +25,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 import model.Author;
-
+import model.Book;
 
 /**
  *
- * @author Tim
+ * @author Timothy
  */
-@WebServlet(name = "AuthorController", urlPatterns = {"/authors"})
-public class AuthorController extends HttpServlet {
-
-    private final String LIST_VIEW = "/authorList.jsp";
-    private final String ADD_OR_UPDATE_VIEW = "/addOrUpdateForm.jsp";
+@WebServlet(name = "BookController", urlPatterns = {"/books"})
+public class BookController extends HttpServlet {
+private final String LIST_VIEW = "/bookList.jsp";
+    private final String ADD_OR_UPDATE_VIEW = "/bookAddOrUpdateForm.jsp";
     
     @Inject
-    private AuthorFacade service;
+    private BookFacade service;
+    
+    @Inject
+    private AuthorFacade authService;
 
     @Override
     public void init() throws ServletException {
@@ -62,42 +61,49 @@ public class AuthorController extends HttpServlet {
             throws ServletException, IOException, ClassNotFoundException, SQLException, Exception {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
-        if (session.getAttribute("updated") == null) {
-            session.setAttribute("updated", 0);
+        if (session.getAttribute("bUpdated") == null) {
+            session.setAttribute("bUpdated", 0);
         }
-        if (session.getAttribute("created") == null) {
-            session.setAttribute("created", 0);
+        if (session.getAttribute("bCreated") == null) {
+            session.setAttribute("bCreated", 0);
         }
-        if (session.getAttribute("deleted") == null) {
-            session.setAttribute("deleted", 0);
+        if (session.getAttribute("bDeleted") == null) {
+            session.setAttribute("bDeleted", 0);
         }
         ServletContext ctx = request.getServletContext();
         ctx.setAttribute("date", new Date());
         String destination = LIST_VIEW;
-        Author author;
+        Book book;
+        List<Author> authorList;
         try {
             String formAction = request.getParameter("userAction");
             if (formAction == null) {
                 formAction = "";
             }
-            String authId;
+            String bookId;
             
 
             switch (formAction) {
                 case "Add":
-                    author = null;
+                    book = null;
+                    authorList = authService.findAll();
+                    session.setAttribute("authorList", authorList);
+                    session.setAttribute("book", book);
                     refreshList(request, service);
                     destination = ADD_OR_UPDATE_VIEW;
                     break;
 
                 case "Update":
 
-                    if (request.getParameter("authorPk") != null) {
+                    if (request.getParameter("bookPk") != null) {
 
-                        authId = request.getParameter("authorPk");
-                        author = service.find(new Integer(authId));
-                        session.setAttribute("bookSet", author.getBookSet());
-                        session.setAttribute("author", author);
+                        bookId = request.getParameter("bookPk");
+                        book = service.find(new Integer(bookId));
+                        authorList = authService.findAll();
+                        session.setAttribute("authorList", authorList);
+                        session.setAttribute("book", book);
+                        session.setAttribute("author", authService.find(book.getAuthorId().getAuthorId()));
+                        
                         destination = ADD_OR_UPDATE_VIEW;
                     } else {
                         refreshList(request, service);
@@ -105,11 +111,11 @@ public class AuthorController extends HttpServlet {
                     }
                     break;
                 case "Delete":
-                    if (request.getParameter("authorPk") != null) {
-                        authId = request.getParameter("authorPk");
-                        author = service.find(new Integer(authId));
-                        service.remove(author);
-                        session.setAttribute("deleted", (int) session.getAttribute("deleted") + 1);
+                    if (request.getParameter("bookPk") != null) {
+                        bookId = request.getParameter("bookPk");
+                        book = service.find(new Integer(bookId));
+                        service.remove(book);
+                        session.setAttribute("bDeleted", (int) session.getAttribute("bDeleted") + 1);
                         refreshList(request, service);
                         destination = LIST_VIEW;
                     } else {
@@ -118,22 +124,39 @@ public class AuthorController extends HttpServlet {
                     }
                     break;
                 case "Create":
-                    author = new Author();
-                    author.setAuthorName(request.getParameter("authorName"));
-                    author.setDateAdded(new Date());
-                    service.create(author);
-                    session.setAttribute("created", (int) session.getAttribute("created") + 1);
+                    book = new Book();
+                    book.setTitle(request.getParameter("title"));
+                    book.setIsbn(request.getParameter("isbn"));
+                    String authorId = request.getParameter("authorId");
+                    Author author = authService.find(new Integer(authorId));
+                    book.setAuthorId(author);                    
+                    service.create(book);
+                    Set<Book> bookSet = author.getBookSet();
+                    bookSet.add(book);
+                    author.setBookSet(bookSet);                    
+                    session.setAttribute("bCreated", (int) session.getAttribute("bCreated") + 1);
                     refreshList(request, service);
                     destination = LIST_VIEW;
                     break;
 
                 case "Submit":
-                    authId = request.getParameter("authorId");
-                    author = service.find(new Integer(authId));
-                    String authorName = request.getParameter("authorName");
-                    author.setAuthorName(authorName);
-                    service.edit(author);
-                    session.setAttribute("updated", (int) session.getAttribute("updated") + 1);
+                    author = (Author)session.getAttribute("author");
+                    bookSet = author.getBookSet();
+                    bookId = request.getParameter("bookId");
+                    book = service.find(new Integer(bookId));
+                    bookSet.remove(book);
+                    String title = request.getParameter("title");
+                    String isbn = request.getParameter("isbn");
+                    book.setTitle(title);
+                    book.setIsbn(isbn);
+                    authorId = request.getParameter("authorId");
+                    author = authService.find(new Integer(authorId));
+                    book.setAuthorId(author);
+                    bookSet = author.getBookSet();
+                    service.edit(book);
+                    bookSet.add(book);
+                    author.setBookSet(bookSet);
+                    session.setAttribute("bUpdated", (int) session.getAttribute("bUpdated") + 1);
                     refreshList(request, service);
                     destination = LIST_VIEW;
                     break;
@@ -153,9 +176,9 @@ public class AuthorController extends HttpServlet {
         view.forward(request, response);
     }
 
-    public void refreshList(HttpServletRequest request, AuthorFacade service) throws ClassNotFoundException, SQLException {
-        List<Author> authorList = service.findAll();
-        request.setAttribute("authors", authorList);
+    public void refreshList(HttpServletRequest request, BookFacade service) throws ClassNotFoundException, SQLException {
+        List<Book> bookList = service.findAll();
+        request.setAttribute("books", bookList);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -170,17 +193,16 @@ public class AuthorController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (SQLException ex) {
-            Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    try {
+        processRequest(request, response);
+    } catch (SQLException ex) {
+        Logger.getLogger(BookController.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception ex) {
+        Logger.getLogger(BookController.class.getName()).log(Level.SEVERE, null, ex);
+    }
     }
 
     /**
-     *
      * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
@@ -191,13 +213,13 @@ public class AuthorController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (SQLException ex) {
-            Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(AuthorController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    try {
+        processRequest(request, response);
+    } catch (SQLException ex) {
+        Logger.getLogger(BookController.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception ex) {
+        Logger.getLogger(BookController.class.getName()).log(Level.SEVERE, null, ex);
+    }
     }
 
     /**
