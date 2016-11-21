@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import model.Author;
+import model.Book;
 
 
 /**
@@ -86,6 +89,7 @@ public class AuthorController extends HttpServlet {
             switch (formAction) {
                 case "Add":
                     author = null;
+                    session.setAttribute("author", author);
                     refreshList(request, service);
                     destination = ADD_OR_UPDATE_VIEW;
                     break;
@@ -121,10 +125,12 @@ public class AuthorController extends HttpServlet {
                     author = new Author();
                     author.setAuthorName(request.getParameter("authorName"));
                     author.setDateAdded(new Date());
+                    Set<Book> bookSet = Collections.emptySet();
+                    author.setBookSet(bookSet);
                     service.create(author);
                     session.setAttribute("created", (int) session.getAttribute("created") + 1);
-                    refreshList(request, service);
-                    destination = LIST_VIEW;
+                    destination = LIST_VIEW;                    refreshList(request, service);
+
                     break;
 
                 case "Submit":
